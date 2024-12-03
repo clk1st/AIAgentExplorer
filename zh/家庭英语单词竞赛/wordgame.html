@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家庭英语单词竞赛</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #FFD700;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            background-color: #FFF;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            max-width: 90%;
+            width: 800px;
+        }
+        .left-panel, .right-panel {
+            flex: 1;
+            padding: 20px;
+        }
+        .left-panel {
+            border-right: 2px solid #FFD700;
+        }
+        h1 {
+            color: #FF6347;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #word {
+            font-family: 'Arial', sans-serif;
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #4169E1;
+            font-weight: bold;
+            text-align: center;
+        }
+        #input {
+            font-size: 18px;
+            padding: 10px;
+            width: 80%;
+            border: 3px solid #4CAF50;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        #submit {
+            font-size: 24px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #submit:hover {
+            background-color: #45a049;
+        }
+        #scores {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+        .score {
+            font-size: 24px;
+            background-color: #e9f5db; /* 更柔和的背景色 */
+            padding: 10px;
+            border-radius: 10px;
+            min-width: 100px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .player-name {
+            font-weight: bold;
+            color: #588157; /* 更柔和的绿色 */
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #hint {
+            font-size: 18px;
+            color: #666;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #playButton {
+            font-size: 18px;
+            padding: 5px 10px;
+            background-color: #4169E1;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 20px;
+        }
+        #playButton:hover {
+            background-color: #3258BE;
+            transform: scale(1.05);
+        }
+        #playButton:active {
+            transform: scale(0.95);
+        }
+        .play-icon, .pause-icon {
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+        .play-icon {
+            border-width: 10px 0 10px 20px;
+            border-color: transparent transparent transparent #ffffff;
+            margin-left: 5px;
+        }
+        .pause-icon {
+            border-width: 0 5px;
+            border-color: #ffffff;
+            border-style: double;
+            height: 20px;
+            width: 15px;
+        }
+        #history {
+            margin-top: 20px;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .history-item {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .correct {
+            background-color: #90EE90;
+        }
+        .incorrect {
+            background-color: #FFA07A;
+        }
+        #encouragement {
+            margin-top: 20px;
+            font-style: italic;
+            color: #4CAF50;
+        }
+        #tips {
+            margin: 20px auto;
+            font-size: 28px;
+            font-weight: bold;
+            display: none;
+            color: #1e3a8a;  /* 深蓝色，更醒目 */
+            background-color: #dbeafe;  /* 浅蓝色背景 */
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 80%;
+            text-align: center;
+            border: 2px solid #3b82f6;  /* 添加边框 */
+            animation: pulse 2s infinite;  /* 添加脉冲动画 */
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* 为正确答案添加特殊样式 */
+        #tips.correct {
+            background-color: #d1fae5;  /* 浅绿色背景 */
+            border-color: #10b981;  /* 绿色边框 */
+            color: #065f46;  /* 深绿色文字 */
+        }
+
+        /* 为错误答案添加特殊样式 */
+        #tips.incorrect {
+            background-color: #fee2e2;  /* 浅红色背景 */
+            border-color: #ef4444;  /* 红色边框 */
+            color: #991b1b;  /* 深红色文字 */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>家庭英语单词竞赛</h1>
+            <div id="word"></div>
+            <div id="hint"></div>
+            <div>
+                <button id="playButton">
+                    <div class="play-icon"></div>
+                </button>
+                <audio id="myAudio">
+                    <source src="speech1.mp3" type="audio/mpeg">
+                </audio>
+            </div>
+            <input type="text" id="input" placeholder="填写完整英文单词" autocomplete="off">
+            <button id="submit">提交答案</button>
+            <div id="scores">
+                <div class="score"><span class="player-name">可乐</span>: <span id="scoreCola">0</span></div>
+                <div class="score"><span class="player-name">爸爸</span>: <span id="scoreDad">0</span></div>
+                <!--<div class="score"><span class="player-name">妈妈</span>: <span id="scoreMom">0</span></div>-->
+            </div>
+            <div id="message"></div>
+        </div>
+        <div class="right-panel">
+            <h1>答题记录</h1>
+            <div id="history"></div>
+            <div id="tips"></div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            let currentPlayer = 'cola';
+            let scores = {cola: 0, dad: 0, mom: 0};
+            let playerNames = {cola: '可乐', dad: '爸爸'};
+            let currentWord = '';
+            let currentHint = '';
+            let audio = document.getElementById('myAudio');
+            let playButton = document.getElementById('playButton');
+            let encouragements = [
+                "太棒了！继续保持！",
+                "你真是个语言天才！",
+                "真厉害，你在不断进步！",
+                "wow，你太优秀了！",
+                "你的进步让人惊叹！"
+            ];
+
+            function getWord() {
+                var result = null;
+
+                $.ajax({
+                    url: 'http://localhost:8111/game.php',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    async: false,
+                    data: JSON.stringify({
+                        act_type: "word"
+                    }),
+                    success: function(response) {
+                        if (response.resCode === 200) {
+                            result = response.data;
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        result = null;
+                    }
+                });
+
+                return result;
+            }
+
+            function obscureWord(word) {
+                if (typeof word !== 'string') {
+                    throw new Error('Input must be a string');
+                }
+
+                let characters = word.split('');
+                let letterPositions = [];
+
+                for (let i = 0; i < characters.length; i++) {
+                    if (/[a-zA-Z]/.test(characters[i])) {
+                        letterPositions.push(i);
+                    }
+                }
+
+                letterPositions.forEach(pos => {
+                    if (Math.random() < 0.5) {
+                        characters[pos] = '_ ';
+                    }
+                });
+
+                if (!characters.includes('_ ')) {
+                    let randomIndex = letterPositions[Math.floor(Math.random() * letterPositions.length)];
+                    characters[randomIndex] = '_ ';
+                }
+
+                return characters.join('');
+            }
+
+            function updateAudioSource(word) {
+                // 重置播放按钮状态
+                playButton.innerHTML = '<div class="play-icon"></div>';
+                audio.pause();
+                
+                // 更新音频源
+                audio.src = `audio/${word.toLowerCase()}.mp3`;
+                
+                // 预加载音频
+                audio.load();
+            }
+
+            function updateWord(partialWord, hint) {
+                $('#word').text(obscureWord(partialWord));
+                $('#hint').text("提示：" + hint);
+                currentWord = partialWord.toLowerCase();
+                currentHint = hint;
+                
+                // 更新音频源
+                updateAudioSource(currentWord);
+            }
+
+            function updateScores() {
+                $('#scoreCola').text(scores.cola);
+                $('#scoreDad').text(scores.dad);
+                $('#scoreMom').text(scores.mom);
+            }
+
+            function switchPlayer() {
+                switch(currentPlayer) {
+                    case 'cola': currentPlayer = 'dad'; break;
+                    case 'dad': currentPlayer = 'cola'; break;
+                }
+                $('#message').text(playerNames[currentPlayer] + '，轮到你啦！');
+            }
+
+            function addToHistory(player, word, isCorrect) {
+                let historyItem = $('<div class="history-item">').addClass(isCorrect ? 'correct' : 'incorrect');
+                historyItem.text(playerNames[player] + (isCorrect ? ' 正确回答: ' : ' 错误回答: ') + word);
+                $('#history').prepend(historyItem);
+            }
+
+            function showEncouragement() {
+                let randomIndex = Math.floor(Math.random() * encouragements.length);
+                $('#tips').text(encouragements[randomIndex]);
+            }
+
+            $('#submit').click(function() {
+                let answer = $('#input').val().toLowerCase();
+                
+                let isCorrect = answer === currentWord;
+                
+                if (isCorrect) {
+                    scores[currentPlayer]++;
+                    updateScores();
+                    showEncouragement();
+                    addToHistory(currentPlayer, answer, true);
+                    $('#tips').removeClass('incorrect').addClass('correct');
+                } else {
+                    $('#tips').text('加油！' + playerNames[currentPlayer] + '，再试一次，你一定能行！');
+                    addToHistory(currentPlayer, answer, false);
+                    $('#tips').removeClass('correct').addClass('incorrect');
+                }
+                $('#tips').fadeIn();
+                
+                setTimeout(function() {
+                    $('#tips').fadeOut();
+                }, 5000);
+
+                switchPlayer();
+                $('#input').val('');
+
+                if (isCorrect) {
+                    word_result = getWord();
+                    updateWord(word_result['word'], word_result['tips']);
+                }
+            });
+
+            playButton.addEventListener('click', function() {
+                if (audio.paused) {
+                    playButton.innerHTML = '<div class="pause-icon"></div>';
+                    audio.play();
+                } else {
+                    playButton.innerHTML = '<div class="play-icon"></div>';
+                    audio.pause();
+                }
+            });
+
+            // 音频播放结束时重置播放按钮
+            audio.addEventListener('ended', function() {
+                playButton.innerHTML = '<div class="play-icon"></div>';
+            });
+
+            // 初始化游戏
+            word_result = getWord();
+            updateWord(word_result['word'], word_result['tips']);
+            $('#message').text(playerNames[currentPlayer] + '，开始游戏吧！');
+        });
+    </script>
+</body>
+</html>
